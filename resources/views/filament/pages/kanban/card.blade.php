@@ -13,7 +13,9 @@
 @endphp
 
 <div
-    class="p-4 bg-white rounded-lg shadow space-y-3 border border-gray-100 hover:border-primary-500 transition-all duration-200">
+    data-kanban-card
+    data-record-id="{{ $record->getKey() }}"
+    class="fi-kanban-card cursor-grab p-4 bg-white rounded-lg shadow space-y-3 border border-gray-100 hover:border-primary-500 transition-all duration-200">
     <div class="font-bold text-gray-900 text-sm flex justify-between items-start">
         <div>
             {{ $customer?->name ?? 'Cliente Sem Nome' }}
@@ -53,22 +55,22 @@
     @if ($customer)
         <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-gray-50">
             @if ($customer->whatsappUrl())
-                <a href="{{ $customer->whatsappUrl() }}" target="_blank" rel="noopener" style="{{ $chip }}background:#25D366;">💬 Whats</a>
+                <a x-on:click.stop href="{{ $customer->whatsappUrl() }}" target="_blank" rel="noopener" style="{{ $chip }}background:#25D366;">💬 Whats</a>
             @endif
 
             @if ($customer->instagramUrl())
-                <a href="{{ $customer->instagramUrl() }}" target="_blank" rel="noopener" style="{{ $chip }}background:#E1306C;">📷 Insta</a>
+                <a x-on:click.stop href="{{ $customer->instagramUrl() }}" target="_blank" rel="noopener" style="{{ $chip }}background:#E1306C;">📷 Insta</a>
             @else
-                <a href="{{ $customer->instagramSearchUrl() }}" target="_blank" rel="noopener" style="{{ $chip }}background:#9333ea;">🔎 Insta</a>
+                <a x-on:click.stop href="{{ $customer->instagramSearchUrl() }}" target="_blank" rel="noopener" style="{{ $chip }}background:#9333ea;">🔎 Insta</a>
             @endif
 
             @if ($customer->websiteUrl())
-                <a href="{{ $customer->websiteUrl() }}" target="_blank" rel="noopener" style="{{ $chip }}background:#2563eb;">🌐 Site</a>
+                <a x-on:click.stop href="{{ $customer->websiteUrl() }}" target="_blank" rel="noopener" style="{{ $chip }}background:#2563eb;">🌐 Site</a>
             @else
-                <a href="{{ $customer->googleSearchUrl() }}" target="_blank" rel="noopener" style="{{ $chip }}background:#0ea5e9;">🔎 Site</a>
+                <a x-on:click.stop href="{{ $customer->googleSearchUrl() }}" target="_blank" rel="noopener" style="{{ $chip }}background:#0ea5e9;">🔎 Site</a>
             @endif
 
-            <a href="{{ $customer->googleMapsUrl() }}" target="_blank" rel="noopener" style="{{ $chip }}background:#ea4335;">📍 Maps</a>
+            <a x-on:click.stop href="{{ $customer->googleMapsUrl() }}" target="_blank" rel="noopener" style="{{ $chip }}background:#ea4335;">📍 Maps</a>
         </div>
     @endif
 
@@ -77,7 +79,7 @@
             {{ $record->channel ?? '—' }}
         </span>
 
-        <a href="{{ route('filament.admin.resources.prospects.edit', $record) }}" class="text-primary-600 hover:text-primary-700 font-medium">
+        <a x-on:click.stop href="{{ route('filament.admin.resources.prospects.edit', $record) }}" class="text-primary-600 hover:text-primary-700 font-medium">
             Editar
         </a>
     </div>
