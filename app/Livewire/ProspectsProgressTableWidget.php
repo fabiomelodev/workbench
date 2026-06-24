@@ -2,10 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Filament\Actions\ContactCenterAction;
 use App\Helpers\FormatCurrency;
 use App\Models\Prospect;
 use Filament\Actions\{BulkActionGroup, EditAction};
 use Filament\Forms\Components\{DatePicker, Select};
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
@@ -24,8 +26,15 @@ class ProspectsProgressTableWidget extends TableWidget
             ->query(fn(): Builder => Prospect::query()->whereIn('status', Prospect::getTypeStatusProgress()))
             ->columns([
                 TextColumn::make('proposal.customer.name')
-                    ->label('Proposta')
+                    ->label('Empresa')
                     ->formatStateUsing(fn(string $state): string => Str::limit($state, 28)),
+                TextColumn::make('phone_status')
+                    ->label('Telefone')
+                    ->badge()
+                    ->state(fn(Prospect $record): string => $record->proposal?->customer?->phoneTypeLabel() ?? 'Sem número')
+                    ->color(fn(Prospect $record): string => $record->proposal?->customer?->phoneTypeColor() ?? 'gray')
+                    ->icon(Heroicon::OutlinedPhone)
+                    ->url(fn(Prospect $record): ?string => $record->proposal?->customer?->whatsappUrl(), true),
                 TextColumn::make('proposal.amount')
                     ->label('Orçamento')
                     ->numeric()
@@ -50,6 +59,7 @@ class ProspectsProgressTableWidget extends TableWidget
                 //
             ])
             ->recordActions([
+                ContactCenterAction::make(),
                 EditAction::make()
                     ->iconButton()
                     ->schema([

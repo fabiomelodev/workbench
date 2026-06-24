@@ -3,9 +3,9 @@
 namespace App\Filament\Imports;
 
 use App\Models\{City, Customer, Niche, Proposal, Prospect};
+use App\Services\PhoneNumberService;
 use Filament\Actions\Imports\{ImportColumn, Importer};
 use Filament\Actions\Imports\Models\Import;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Number;
 
 class CustomerImporter extends Importer
@@ -20,7 +20,8 @@ class CustomerImporter extends Importer
                 ->requiredMapping()
                 ->rules(['required', 'max:255']),
             ImportColumn::make('instagram')
-                ->rules(['max:255']),
+                ->rules(['max:255'])
+                ->castStateUsing(fn(?string $state): ?string => filled($state) ? trim($state) : null),
             ImportColumn::make('facebook')
                 ->rules(['max:255']),
             ImportColumn::make('phone')
@@ -60,9 +61,48 @@ class CustomerImporter extends Importer
         ];
     }
 
+    /**
+     * Evita clientes duplicados: se já existe um cliente com o mesmo telefone,
+     * atualiza-o (mescla) em vez de criar um novo.
+     */
     public function resolveRecord(): Customer
     {
+        $raw = $this->data['phone'] ?? null;
+
+        if (filled($raw)) {
+            $parsed = app(PhoneNumberService::class)->parse($raw);
+            $digits = $parsed['digits'] ?? preg_replace('/\D+/', '', (string) $raw);
+
+            if (filled($digits)) {
+                $existing = Customer::query()
+                    ->where('phone', $digits)
+                    ->orWhere('whatsapp', 'LIKE', '%' . $digits . '%')
+                    ->first();
+
+                if ($existing) {
+                    return $existing;
+                }
+            }
+        }
+
         return new Customer();
+    }
+
+    /**
+     * Em re-importações de um cliente existente, não sobrescreve dados já
+     * preenchidos: o import apenas preenche as lacunas (enriquece).
+     */
+    protected function beforeSave(): void
+    {
+        if (! $this->record->exists) {
+            return;
+        }
+
+        foreach (['name', 'instagram', 'facebook', 'email', 'website', 'phone', 'city_id', 'niche_id'] as $field) {
+            if (filled($this->record->getOriginal($field))) {
+                $this->record->{$field} = $this->record->getOriginal($field);
+            }
+        }
     }
 
     protected function afterCreate(): void
@@ -70,8 +110,6 @@ class CustomerImporter extends Importer
         $proposalName = 'Proposta ' . $this->record->name;
 
         $proposalSlug = 'proposta-' . $this->record->slug;
-
-        Log::info($proposalSlug);
 
         $proposal = Proposal::updateOrCreate(
             ['slug' => $proposalSlug],
@@ -93,10 +131,10 @@ class CustomerImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your customer import has completed and ' . Number::format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'A importação de clientes foi concluída: ' . Number::format($import->successful_rows) . ' ' . str('linha')->plural($import->successful_rows) . ' processada(s).';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . Number::format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' ' . Number::format($failedRowsCount) . ' ' . str('linha')->plural($failedRowsCount) . ' falhou(aram).';
         }
 
         return $body;
