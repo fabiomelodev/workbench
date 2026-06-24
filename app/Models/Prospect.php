@@ -25,6 +25,9 @@ class Prospect extends Model
     public const NO_RESPONSE = 'no_response';
     public const HIRED = 'hired';
 
+    /** Quantidade máxima de tentativas antes de decidir continuar ou parar. */
+    public const MAX_ATTEMPTS = 3;
+
     public static function getTypeChannels(): array
     {
         return [
@@ -81,5 +84,16 @@ class Prospect extends Model
         return $this->hasMany(ProspectAttempt::class)
             ->orderBy('attempted_at')
             ->orderBy('id');
+    }
+
+    /** Usa o withCount quando disponível para evitar query extra. */
+    public function attemptsCount(): int
+    {
+        return $this->attempts_count ?? $this->attempts()->count();
+    }
+
+    public function attemptsReachedLimit(): bool
+    {
+        return $this->attemptsCount() >= self::MAX_ATTEMPTS;
     }
 }

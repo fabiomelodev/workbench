@@ -61,22 +61,15 @@ enum LeadStatus: string implements HasIcon, KanbanStatusEnum
     }
 
     // Define which statuses each status can transition to.
-    // Return null to allow all transitions.
+    // Return null to allow all transitions (arrastar para qualquer coluna).
     public function getAllowedTransitions(): ?array
     {
-        return match ($this) {
-            self::NEW => [self::NEW],
-            self::ON_HOLD => [self::ON_HOLD],
-            default => [self::NEW],
-        };
+        return null;
     }
 
-    // Set max cards per column. Return null for unlimited.
+    // Set max cards per column. Return null for unlimited (sem limite de cartões).
     public function getWipLimit(): ?int
     {
-        return match ($this) {
-            self::NEW => 10,
-            default => null,
-        };
+        return null;
     }
 }

@@ -27,9 +27,9 @@ class AttemptsAction extends Action
         parent::setUp();
 
         $this
-            ->label(fn (Model $record): string => 'Tentativas (' . static::countFor($record) . ')')
+            ->label(fn (Model $record): string => 'Tentativas (' . static::countFor($record) . '/' . Prospect::MAX_ATTEMPTS . ')')
             ->icon(Heroicon::OutlinedClipboardDocumentList)
-            ->color('gray')
+            ->color(fn (Model $record): string => static::countFor($record) >= Prospect::MAX_ATTEMPTS ? 'danger' : 'gray')
             ->slideOver()
             ->modalHeading('Histórico de tentativas')
             ->modalDescription('Cada contato registrado entra no histórico para você acompanhar quantas tentativas já fez.')

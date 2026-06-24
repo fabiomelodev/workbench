@@ -38,9 +38,14 @@
             <span class="text-success-600 font-semibold">R$
                 {{ number_format($record->proposal?->amount ?? 0, 2, ',', '.') }}</span>
         </div>
+        @php $attemptsCount = $record->attempts_count ?? 0; @endphp
         <div>
             <span class="font-semibold text-gray-400">Tentativas:</span>
-            <span class="text-gray-900 font-medium">{{ $record->attempts_count ?? 0 }}</span>
+            <span @class([
+                'font-medium',
+                'text-gray-900' => $attemptsCount < \App\Models\Prospect::MAX_ATTEMPTS,
+                'text-danger-600 font-bold' => $attemptsCount >= \App\Models\Prospect::MAX_ATTEMPTS,
+            ])>{{ $attemptsCount }}/{{ \App\Models\Prospect::MAX_ATTEMPTS }}</span>
         </div>
     </div>
 

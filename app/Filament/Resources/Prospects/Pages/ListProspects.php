@@ -51,8 +51,10 @@ class ListProspects extends ListRecords
                             ->badge()
                             ->formatStateUsing(fn(string $state): string => Prospect::getStatus($state)),
                         TextEntry::make('attempts_count')
-                            ->label('Tentativas realizadas')
-                            ->state(fn(Prospect $record): int => $record->attempts()->count()),
+                            ->label('Tentativas')
+                            ->badge()
+                            ->state(fn(Prospect $record): string => $record->attempts()->count() . '/' . Prospect::MAX_ATTEMPTS)
+                            ->color(fn(Prospect $record): string => $record->attempts()->count() >= Prospect::MAX_ATTEMPTS ? 'danger' : 'gray'),
                     ])
                     ->fillForm(fn($record) => $record->toArray())
                     ->modalSubmitAction(false)

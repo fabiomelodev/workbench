@@ -7,10 +7,16 @@
     <div style="display:flex;flex-direction:column;gap:.6rem;">
         <div style="display:flex;align-items:center;gap:.5rem;">
             <span style="font-weight:700;font-size:.95rem;">{{ $prospect->proposal?->customer?->name ?? 'Prospecção' }}</span>
-            <span style="display:inline-flex;align-items:center;padding:.15rem .55rem;border-radius:9999px;font-size:.75rem;font-weight:700;background:rgba(120,120,120,.15);">
-                {{ $attempts->count() }} {{ \Illuminate\Support\Str::plural('tentativa', $attempts->count()) }}
+            <span style="display:inline-flex;align-items:center;padding:.15rem .55rem;border-radius:9999px;font-size:.75rem;font-weight:700;background:{{ $attempts->count() >= \App\Models\Prospect::MAX_ATTEMPTS ? '#fee2e2' : 'rgba(120,120,120,.15)' }};color:{{ $attempts->count() >= \App\Models\Prospect::MAX_ATTEMPTS ? '#991b1b' : 'inherit' }};">
+                {{ $attempts->count() }}/{{ \App\Models\Prospect::MAX_ATTEMPTS }} {{ \Illuminate\Support\Str::plural('tentativa', $attempts->count()) }}
             </span>
         </div>
+
+        @if ($attempts->count() >= \App\Models\Prospect::MAX_ATTEMPTS)
+            <div style="display:flex;align-items:center;gap:.5rem;padding:.6rem .75rem;border-radius:.6rem;background:#fee2e2;color:#991b1b;font-size:.85rem;font-weight:600;border:1px solid #fecaca;">
+                ⚠️ Limite de {{ \App\Models\Prospect::MAX_ATTEMPTS }} tentativas atingido — hora de decidir se continua ou para de prospectar.
+            </div>
+        @endif
 
         @forelse ($attempts as $attempt)
             <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;padding:.55rem .75rem;border-radius:.6rem;background:rgba(120,120,120,.08);">

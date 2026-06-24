@@ -102,12 +102,16 @@ class ProspectsToWorkTable extends TableWidget
                     ->label('Tentativas')
                     ->badge()
                     ->alignCenter()
+                    ->formatStateUsing(fn(?int $state): string => ($state ?? 0) . '/' . Prospect::MAX_ATTEMPTS)
                     ->color(fn(Prospect $record): string => match (true) {
-                        ($record->attempts_count ?? 0) >= 5 => 'danger',
-                        ($record->attempts_count ?? 0) >= 3 => 'warning',
+                        ($record->attempts_count ?? 0) >= Prospect::MAX_ATTEMPTS => 'danger',
+                        ($record->attempts_count ?? 0) === Prospect::MAX_ATTEMPTS - 1 => 'warning',
                         ($record->attempts_count ?? 0) === 0 => 'gray',
                         default => 'success',
-                    }),
+                    })
+                    ->tooltip(fn(Prospect $record): ?string => ($record->attempts_count ?? 0) >= Prospect::MAX_ATTEMPTS
+                        ? 'Limite de ' . Prospect::MAX_ATTEMPTS . ' tentativas atingido — hora de decidir'
+                        : null),
                 TextColumn::make('next_action')
                     ->label('Próxima Ação')
                     ->date('d/m/Y')
