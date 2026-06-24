@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Customers\Tables;
 
+use App\Filament\Actions\ContactCenterAction;
+use App\Models\Customer;
 use Filament\Actions\{BulkAction, BulkActionGroup, DeleteAction, DeleteBulkAction, EditAction};
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
@@ -26,24 +28,40 @@ class CustomersTable
                     ->label('Nicho')
                     ->badge()
                     ->searchable(),
-                IconColumn::make('instagram')
-                    ->icon(Heroicon::OutlinedDevicePhoneMobile)
-                    ->url(fn(string $state): string => $state, true),
-                IconColumn::make('facebook')
-                    ->icon(Heroicon::OutlinedDevicePhoneMobile)
-                    ->url(fn(string $state): string => $state, true)
-                    ->toggleable(isToggledHiddenByDefault: true),
-                IconColumn::make('whatsapp')
+                TextColumn::make('phone_type')
+                    ->label('Telefone')
+                    ->badge()
                     ->icon(Heroicon::OutlinedPhone)
-                    ->url(fn(string $state): string => $state, true),
-                TextColumn::make('email')
-                    ->label('Email address')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->formatStateUsing(fn(?string $state, Customer $record): string => $record->phoneTypeLabel())
+                    ->color(fn(Customer $record): string => $record->phoneTypeColor())
+                    ->url(fn(Customer $record): ?string => $record->whatsappUrl(), true)
+                    ->sortable(),
+                TextColumn::make('data_score')
+                    ->label('Dados')
+                    ->badge()
+                    ->state(fn(Customer $record): string => $record->dataScore() . '/' . $record->dataTotal())
+                    ->color(fn(Customer $record): string => match (true) {
+                        $record->dataScore() >= 3 => 'success',
+                        $record->dataScore() === 0 => 'danger',
+                        default => 'warning',
+                    })
+                    ->tooltip(fn(Customer $record): string => $record->missingData()
+                        ? 'Falta: ' . implode(', ', $record->missingData())
+                        : 'Cadastro completo'),
+                IconColumn::make('instagram')
+                    ->label('Insta')
+                    ->icon(Heroicon::OutlinedAtSymbol)
+                    ->color(fn(Customer $record): string => $record->instagramUrl() ? 'primary' : 'gray')
+                    ->url(fn(Customer $record): ?string => $record->instagramUrl(), true),
                 IconColumn::make('website')
                     ->label('Site')
                     ->icon(Heroicon::OutlinedGlobeAlt)
-                    ->url(fn(string $state): string => $state, true),
+                    ->color(fn(Customer $record): string => $record->websiteUrl() ? 'primary' : 'gray')
+                    ->url(fn(Customer $record): ?string => $record->websiteUrl(), true),
+                TextColumn::make('email')
+                    ->label('E-mail')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('city.name')
                     ->label('Cidade')
                     ->badge()
@@ -54,13 +72,15 @@ class CustomersTable
                     ->formatStateUsing(fn(string $state) => match ($state) {
                         'active' => 'Ativo',
                         'inactive' => 'Inativo',
+                        default => $state,
                     })
                     ->colors([
                         'success' => 'active',
                         'danger' => 'inactive',
                     ]),
                 TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Criado em')
+                    ->dateTime('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -71,6 +91,13 @@ class CustomersTable
                 SelectFilter::make('city_id')
                     ->label('Cidade')
                     ->relationship('city', 'name'),
+                SelectFilter::make('phone_type')
+                    ->label('Tipo de telefone')
+                    ->options([
+                        'mobile' => '📱 Celular',
+                        'landline' => '☎️ Fixo',
+                        'invalid' => '⚠️ Inválido',
+                    ]),
                 SelectFilter::make('status')
                     ->default('active')
                     ->options([
@@ -80,17 +107,34 @@ class CustomersTable
                 Filter::make('whatsapp')
                     ->schema([
                         Select::make('has_whatsapp')
-                            ->label('Tem Whatsapp?')
+                            ->label('Tem WhatsApp válido?')
                             ->default('all')
                             ->options([
                                 'all' => 'Todos',
                                 1 => 'Sim',
-                                0 => 'Não'
-                            ])
+                                0 => 'Não',
+                            ]),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        return $query->when($data['has_whatsapp'] == 1, fn(Builder $query): Builder => $query->whereNotNull('whatsapp'))
-                            ->when($data['has_whatsapp'] == 0, fn(Builder $query): Builder => $query->whereNull('whatsapp'));
+                        return $query
+                            ->when($data['has_whatsapp'] == 1, fn(Builder $query): Builder => $query->where('phone_type', 'mobile'))
+                            ->when($data['has_whatsapp'] === '0', fn(Builder $query): Builder => $query->where(fn(Builder $q) => $q->where('phone_type', '!=', 'mobile')->orWhereNull('phone_type')));
+                    }),
+                Filter::make('instagram')
+                    ->schema([
+                        Select::make('has_instagram')
+                            ->label('Tem Instagram?')
+                            ->default('all')
+                            ->options([
+                                'all' => 'Todos',
+                                1 => 'Sim',
+                                0 => 'Não',
+                            ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['has_instagram'] == 1, fn(Builder $query): Builder => $query->whereNotNull('instagram')->where('instagram', '!=', ''))
+                            ->when($data['has_instagram'] === '0', fn(Builder $query): Builder => $query->where(fn(Builder $q) => $q->whereNull('instagram')->orWhere('instagram', '=', '')));
                     }),
                 Filter::make('website')
                     ->schema([
@@ -100,19 +144,21 @@ class CustomersTable
                             ->options([
                                 'all' => 'Todos',
                                 1 => 'Sim',
-                                0 => 'Não'
-                            ])
+                                0 => 'Não',
+                            ]),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        return $query->when($data['has_website'] == 1, fn(Builder $query): Builder => $query->whereNotNull('website'))
-                            ->when($data['has_website'] == 0, fn(Builder $query): Builder => $query->whereNull('website'));
-                    })
+                        return $query
+                            ->when($data['has_website'] == 1, fn(Builder $query): Builder => $query->whereNotNull('website')->where('website', '!=', ''))
+                            ->when($data['has_website'] === '0', fn(Builder $query): Builder => $query->where(fn(Builder $q) => $q->whereNull('website')->orWhere('website', '=', '')));
+                    }),
             ])
             ->recordActions([
+                ContactCenterAction::make(),
                 EditAction::make()
                     ->iconButton(),
                 DeleteAction::make()
-                    ->iconButton()
+                    ->iconButton(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -128,7 +174,6 @@ class CustomersTable
                         ->action(function (Collection $records, $data) {
                             $records->each(function (Model $record) use ($data) {
                                 $record->status = $data['status'];
-
                                 $record->save();
                             });
 

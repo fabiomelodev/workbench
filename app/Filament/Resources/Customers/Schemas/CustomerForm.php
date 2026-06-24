@@ -24,9 +24,12 @@ class CustomerForm
                             ->required(),
                         Fieldset::make('Contatos')
                             ->schema([
-                                TextInput::make('instagram'),
+                                TextInput::make('phone')
+                                    ->label('Telefone / WhatsApp')
+                                    ->helperText('Digite o número; o sistema detecta se é celular ou fixo automaticamente.'),
+                                TextInput::make('instagram')
+                                    ->helperText('@perfil ou link completo.'),
                                 TextInput::make('facebook'),
-                                TextInput::make('whatsapp'),
                                 TextInput::make('email')
                                     ->label('E-mail')
                                     ->email(),

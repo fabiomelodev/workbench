@@ -23,20 +23,19 @@ class CustomerImporter extends Importer
                 ->rules(['max:255']),
             ImportColumn::make('facebook')
                 ->rules(['max:255']),
-            ImportColumn::make('whatsapp')
+            ImportColumn::make('phone')
+                ->label('Telefone / WhatsApp')
                 ->rules(['max:255'])
                 ->castStateUsing(function (?string $state): ?string {
                     if (blank($state)) {
                         return null;
                     }
 
+                    // Guarda apenas os dígitos; o Customer classifica (celular/fixo)
+                    // e gera o link de WhatsApp automaticamente ao salvar.
                     $onlyNumbers = preg_replace('/[^0-9]/', '', $state);
 
-                    if (empty($onlyNumbers)) {
-                        return null;
-                    }
-
-                    return 'https://wa.me/' . $onlyNumbers;
+                    return $onlyNumbers ?: null;
                 }),
             ImportColumn::make('email')
                 ->rules(['email', 'max:255']),

@@ -86,8 +86,9 @@ class ProspectsTable
                         ->icon(Heroicon::CheckCircle)
                         ->schema([
                             Select::make('status')
-                                ->options(['active' => 'Ativo', 'inactive' => 'Inativo'])
-                                ->default('active')
+                                ->label('Status')
+                                ->options(Prospect::getTypeStatus())
+                                ->default(Prospect::ON_HOLD)
                                 ->required(),
                         ])
                         ->action(function (Collection $records, $data) {
