@@ -4,9 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Filament\Widgets\ControlStatsWidget;
 use App\Livewire\KanbanDashboardWidget;
-use App\Livewire\ProspectsNextTable;
-use App\Livewire\ProspectsProgressTableWidget;
-use App\Livewire\ProspectsTodayTable;
+use App\Livewire\ProspectsToWorkTable;
 use Filament\Pages\Dashboard as BaseDashboard;
 
 class Dashboard extends BaseDashboard
@@ -15,10 +13,8 @@ class Dashboard extends BaseDashboard
     {
         return [
             ControlStatsWidget::class,
-            ProspectsTodayTable::class,
-            ProspectsNextTable::class,
+            ProspectsToWorkTable::class,
             KanbanDashboardWidget::class,
-            ProspectsProgressTableWidget::class,
         ];
     }
 }

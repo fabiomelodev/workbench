@@ -15,25 +15,74 @@ use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
-class ProspectsTodayTable extends TableWidget
+/**
+ * Tabela única de trabalho do dia, com abas Atrasados / Hoje / Amanhã.
+ * Substitui "Prospectar Hoje" e "Prospectar Amanhã" e ainda revela os
+ * atrasados (que antes sumiam silenciosamente da lista de "hoje").
+ */
+class ProspectsToWorkTable extends TableWidget
 {
     protected int|string|array $columnSpan = 'full';
 
+    protected string $view = 'livewire.prospects-to-work-table';
+
+    public string $activeTab = 'today';
+
+    /** Status considerados "encerrados" — não viram atraso para cobrar. */
+    protected function finishedStatuses(): array
+    {
+        return [Prospect::HIRED, Prospect::CLOSED, Prospect::NO_RESPONSE];
+    }
+
+    public function tabs(): array
+    {
+        return [
+            'overdue' => 'Atrasados',
+            'today' => 'Hoje',
+            'tomorrow' => 'Amanhã',
+        ];
+    }
+
+    protected function queryFor(string $tab): Builder
+    {
+        return match ($tab) {
+            'overdue' => Prospect::query()
+                ->whereDate('next_action', '<', now())
+                ->whereNotIn('status', $this->finishedStatuses()),
+            'tomorrow' => Prospect::query()
+                ->whereDate('next_action', now()->addDay()),
+            default => Prospect::query()
+                ->where(fn(Builder $q) => $q->whereDate('next_action', now())->orWhereDate('last_action', now())),
+        };
+    }
+
+    public function countFor(string $tab): int
+    {
+        return $this->queryFor($tab)->count();
+    }
+
+    public function setTab(string $tab): void
+    {
+        $this->activeTab = $tab;
+        $this->resetTable();
+    }
+
     public function table(Table $table): Table
     {
-        $query = Prospect::query()->where(function (Builder $query) {
-            $query->whereDate('next_action', now())
-                ->orWhereDate('last_action', now());
-        });
-
         return $table
-            ->heading('Prospectar Hoje')
-            ->paginated(false)
-            ->query(fn() => $query)
+            ->heading('Para Prospectar')
+            ->paginated([10, 25, 50, 'all'])
+            ->defaultPaginationPageOption(10)
+            ->query(fn(): Builder => $this->queryFor($this->activeTab))
+            ->emptyStateHeading(match ($this->activeTab) {
+                'overdue' => 'Nenhum lead atrasado. 👏',
+                'tomorrow' => 'Nada agendado para amanhã.',
+                default => 'Nada para prospectar hoje.',
+            })
             ->columns([
                 TextColumn::make('proposal.customer.name')
                     ->label('Empresa')
-                    ->formatStateUsing(fn(string $state): string => Str::limit($state, 28)),
+                    ->formatStateUsing(fn(?string $state): string => Str::limit((string) $state, 28)),
                 TextColumn::make('phone_status')
                     ->label('Telefone')
                     ->badge()
@@ -45,14 +94,9 @@ class ProspectsTodayTable extends TableWidget
                     ->label('Orçamento')
                     ->numeric()
                     ->sortable()
-                    ->formatStateUsing(fn(string $state): string => FormatCurrency::getFormatCurrency($state)),
+                    ->formatStateUsing(fn(?string $state): string => FormatCurrency::getFormatCurrency((string) $state)),
                 SelectColumn::make('status')
                     ->options(Prospect::getTypeStatus()),
-                TextColumn::make('last_action')
-                    ->label('Última Ação')
-                    ->date('d/m/Y')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('next_action')
                     ->label('Próxima Ação')
                     ->date('d/m/Y')
@@ -92,7 +136,6 @@ class ProspectsTodayTable extends TableWidget
             ]);
     }
 
-    /** Botão de reagendamento rápido da próxima ação. */
     protected function snoozeAction(string $name, string $label, int $days): Action
     {
         return Action::make($name)
