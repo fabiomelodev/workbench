@@ -38,6 +38,10 @@
             <span class="text-success-600 font-semibold">R$
                 {{ number_format($record->proposal?->amount ?? 0, 2, ',', '.') }}</span>
         </div>
+        <div>
+            <span class="font-semibold text-gray-400">Tentativas:</span>
+            <span class="text-gray-900 font-medium">{{ $record->attempts_count ?? 0 }}</span>
+        </div>
     </div>
 
     {{-- Ações de 1 clique --}}

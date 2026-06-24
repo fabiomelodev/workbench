@@ -50,6 +50,9 @@ class ListProspects extends ListRecords
                         TextEntry::make('status')
                             ->badge()
                             ->formatStateUsing(fn(string $state): string => Prospect::getStatus($state)),
+                        TextEntry::make('attempts_count')
+                            ->label('Tentativas realizadas')
+                            ->state(fn(Prospect $record): int => $record->attempts()->count()),
                     ])
                     ->fillForm(fn($record) => $record->toArray())
                     ->modalSubmitAction(false)

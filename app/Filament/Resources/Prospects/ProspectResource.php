@@ -7,12 +7,14 @@ use App\Filament\Resources\Prospects\Pages\EditProspect;
 use App\Filament\Resources\Prospects\Pages\ListProspects;
 use App\Filament\Resources\Prospects\Schemas\ProspectForm;
 use App\Filament\Resources\Prospects\Tables\ProspectsTable;
+use App\Filament\Resources\Prospects\RelationManagers\AttemptsRelationManager;
 use App\Models\Prospect;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class ProspectResource extends Resource
@@ -39,10 +41,15 @@ class ProspectResource extends Resource
         return ProspectsTable::configure($table);
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->withCount('attempts');
+    }
+
     public static function getRelations(): array
     {
         return [
-            //
+            AttemptsRelationManager::class,
         ];
     }
 

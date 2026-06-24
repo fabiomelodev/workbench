@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Filament\Actions\AttemptsAction;
 use App\Filament\Actions\ContactCenterAction;
 use App\Helpers\FormatCurrency;
 use App\Models\Prospect;
@@ -73,7 +74,7 @@ class ProspectsToWorkTable extends TableWidget
             ->heading('Para Prospectar')
             ->paginated([10, 25, 50, 'all'])
             ->defaultPaginationPageOption(10)
-            ->query(fn(): Builder => $this->queryFor($this->activeTab))
+            ->query(fn(): Builder => $this->queryFor($this->activeTab)->withCount('attempts'))
             ->emptyStateHeading(match ($this->activeTab) {
                 'overdue' => 'Nenhum lead atrasado. 👏',
                 'tomorrow' => 'Nada agendado para amanhã.',
@@ -97,6 +98,16 @@ class ProspectsToWorkTable extends TableWidget
                     ->formatStateUsing(fn(?string $state): string => FormatCurrency::getFormatCurrency((string) $state)),
                 SelectColumn::make('status')
                     ->options(Prospect::getTypeStatus()),
+                TextColumn::make('attempts_count')
+                    ->label('Tentativas')
+                    ->badge()
+                    ->alignCenter()
+                    ->color(fn(Prospect $record): string => match (true) {
+                        ($record->attempts_count ?? 0) >= 5 => 'danger',
+                        ($record->attempts_count ?? 0) >= 3 => 'warning',
+                        ($record->attempts_count ?? 0) === 0 => 'gray',
+                        default => 'success',
+                    }),
                 TextColumn::make('next_action')
                     ->label('Próxima Ação')
                     ->date('d/m/Y')
@@ -104,6 +115,7 @@ class ProspectsToWorkTable extends TableWidget
             ])
             ->recordActions([
                 ContactCenterAction::make(),
+                AttemptsAction::make(),
                 ActionGroup::make([
                     $this->snoozeAction('snooze_1', '+1 dia', 1),
                     $this->snoozeAction('snooze_3', '+3 dias', 3),

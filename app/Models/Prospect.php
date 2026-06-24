@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Prospect extends Model
 {
@@ -72,5 +73,13 @@ class Prospect extends Model
     public function proposal(): BelongsTo
     {
         return $this->belongsTo(Proposal::class);
+    }
+
+    /** Histórico de tentativas de contato (canal + data), em ordem cronológica. */
+    public function attempts(): HasMany
+    {
+        return $this->hasMany(ProspectAttempt::class)
+            ->orderBy('attempted_at')
+            ->orderBy('id');
     }
 }
