@@ -19,7 +19,7 @@ class CityResource extends Resource
 {
     protected static ?string $model = City::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMapPin;
 
     protected static ?string $recordTitleAttribute = 'City';
 
@@ -28,6 +28,13 @@ class CityResource extends Resource
     protected static ?string $pluralLabel = 'Cidades';
 
     protected static string|UnitEnum|null $navigationGroup = 'Configurações';
+
+    protected static ?int $navigationSort = 1;
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) City::query()->active()->count();
+    }
 
     public static function form(Schema $schema): Schema
     {

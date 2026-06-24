@@ -19,13 +19,13 @@ use UnitEnum;
  */
 class Triagem extends Page
 {
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFunnel;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Clientes';
+    protected static string|UnitEnum|null $navigationGroup = 'Modo Triagem';
 
     protected static ?string $navigationLabel = 'Modo Triagem';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $title = 'Modo Triagem';
 

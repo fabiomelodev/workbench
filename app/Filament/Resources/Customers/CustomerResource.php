@@ -19,7 +19,7 @@ class CustomerResource extends Resource
 {
     protected static ?string $model = Customer::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
     protected static ?string $recordTitleAttribute = 'Customer';
 
@@ -28,6 +28,13 @@ class CustomerResource extends Resource
     protected static ?string $pluralLabel = 'Clientes';
 
     protected static string|UnitEnum|null $navigationGroup = 'Clientes';
+
+    protected static ?int $navigationSort = 1;
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) Customer::query()->active()->count();
+    }
 
     public static function form(Schema $schema): Schema
     {

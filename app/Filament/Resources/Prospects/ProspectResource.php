@@ -21,7 +21,7 @@ class ProspectResource extends Resource
 {
     protected static ?string $model = Prospect::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMegaphone;
 
     protected static ?string $recordTitleAttribute = 'Prospect';
 
@@ -30,6 +30,13 @@ class ProspectResource extends Resource
     protected static ?string $pluralLabel = 'Prospecções';
 
     protected static string|UnitEnum|null $navigationGroup = 'Clientes';
+
+    protected static ?int $navigationSort = 3;
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) Prospect::query()->count();
+    }
 
     public static function form(Schema $schema): Schema
     {

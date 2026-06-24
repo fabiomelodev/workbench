@@ -19,7 +19,7 @@ class NicheResource extends Resource
 {
     protected static ?string $model = Niche::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 
     protected static ?string $recordTitleAttribute = 'Niche';
 
@@ -28,6 +28,13 @@ class NicheResource extends Resource
     protected static ?string $pluralLabel = 'Nichos';
 
     protected static string|UnitEnum|null $navigationGroup = 'Configurações';
+
+    protected static ?int $navigationSort = 2;
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) Niche::query()->active()->count();
+    }
 
     public static function form(Schema $schema): Schema
     {
