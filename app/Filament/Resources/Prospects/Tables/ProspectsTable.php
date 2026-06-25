@@ -19,11 +19,18 @@ class ProspectsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->heading('Lista de prospecções')
+            ->description('Busque e filtre as prospecções na tabela abaixo do quadro.')
             ->columns([
+                TextColumn::make('proposal.customer.name')
+                    ->label('Empresa')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('proposal.name')
                     ->label('Proposta')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('channel')
                     ->label('Canal Usado')
                     ->formatStateUsing(fn(string $state): string => Prospect::getChannel($state)),
@@ -45,6 +52,9 @@ class ProspectsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options(Prospect::getTypeStatus()),
                 SelectFilter::make('channel')
                     ->label('Canal Usado')
                     ->options(Prospect::getTypeChannels()),

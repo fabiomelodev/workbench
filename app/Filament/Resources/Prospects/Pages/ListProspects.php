@@ -10,6 +10,9 @@ use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\EmbeddedTable;
+use Filament\Schemas\Components\View;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\HtmlString;
@@ -27,6 +30,19 @@ class ListProspects extends ListRecords
         return [
             CreateAction::make(),
         ];
+    }
+
+    /**
+     * Mostra o quadro Kanban e, logo abaixo, a tabela padrão do Filament
+     * (com busca, filtros, ordenação e paginação). O trait HasKanbanBoard
+     * normalmente exibe só o board; aqui acrescentamos a tabela.
+     */
+    public function content(Schema $schema): Schema
+    {
+        return $schema->components([
+            View::make($this->getKanbanBoard()->getBoardView()),
+            EmbeddedTable::make(),
+        ]);
     }
 
     public function kanban(KanbanBoard $kanban): KanbanBoard
