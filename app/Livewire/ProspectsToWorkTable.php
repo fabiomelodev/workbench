@@ -91,6 +91,13 @@ class ProspectsToWorkTable extends TableWidget
                     ->color(fn(Prospect $record): string => $record->proposal?->customer?->phoneTypeColor() ?? 'gray')
                     ->icon(Heroicon::OutlinedPhone)
                     ->url(fn(Prospect $record): ?string => $record->proposal?->customer?->whatsappUrl(), true),
+                TextColumn::make('proposal.type')
+                    ->label('Tipo')
+                    ->badge()
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                        'closed_budget' => 'Orçamento Fechado',
+                        'signature' => 'Assinatura'
+                    }),
                 TextColumn::make('proposal.amount')
                     ->label('Orçamento')
                     ->numeric()
