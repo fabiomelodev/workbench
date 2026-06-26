@@ -29,6 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
+            ->favicon(asset('favicon.svg'))
             ->login()
             ->sidebarCollapsibleOnDesktop()
             ->colors([
