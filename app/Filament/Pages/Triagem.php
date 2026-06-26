@@ -65,14 +65,14 @@ class Triagem extends Page
     public function remainingCount(): int
     {
         return static::pendingQuery()
-            ->when($this->skipped, fn (Builder $q) => $q->whereNotIn('id', $this->skipped))
+            ->when($this->skipped, fn(Builder $q) => $q->whereNotIn('id', $this->skipped))
             ->count();
     }
 
     protected function loadNext(): void
     {
         $next = static::pendingQuery()
-            ->when($this->skipped, fn (Builder $q) => $q->whereNotIn('id', $this->skipped))
+            ->when($this->skipped, fn(Builder $q) => $q->whereNotIn('id', $this->skipped))
             ->orderBy('id')
             ->first();
 
@@ -87,7 +87,7 @@ class Triagem extends Page
     {
         $customer = $this->currentCustomer();
 
-        if (! $customer) {
+        if (!$customer) {
             return;
         }
 
@@ -129,8 +129,8 @@ class Triagem extends Page
         return $count > 0 ? (string) $count : null;
     }
 
-    public static function getNavigationBadgeColor(): string|array|null
-    {
-        return 'warning';
-    }
+    // public static function getNavigationBadgeColor(): string|array|null
+    // {
+    //     return 'warning';
+    // }
 }
