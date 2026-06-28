@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Filament\Actions\AttemptsAction;
 use App\Filament\Actions\ContactCenterAction;
+use App\Filament\Actions\ProposalAction;
 use App\Helpers\FormatCurrency;
 use App\Models\Prospect;
 use Filament\Actions\{Action, ActionGroup, BulkActionGroup, DeleteAction, EditAction};
@@ -126,6 +127,7 @@ class ProspectsToWorkTable extends TableWidget
             ])
             ->recordActions([
                 ContactCenterAction::make(),
+                ProposalAction::make(),
                 AttemptsAction::make(),
                 ActionGroup::make([
                     $this->snoozeAction('snooze_1', '+1 dia', 1),
