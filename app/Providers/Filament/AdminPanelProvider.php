@@ -31,8 +31,6 @@ class AdminPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->favicon(asset('favicon.svg'))
             ->login()
-            ->databaseNotifications()
-            ->databaseNotificationsPolling('60s')
             ->sidebarCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Violet,
