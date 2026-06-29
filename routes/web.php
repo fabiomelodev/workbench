@@ -2,6 +2,5 @@
 
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+// A raiz do site leva direto para o login do painel.
+Route::redirect('/', '/admin/login');
