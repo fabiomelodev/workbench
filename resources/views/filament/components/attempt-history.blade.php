@@ -25,6 +25,16 @@
                 </span>
                 <span style="font-weight:600;">📣 {{ $attempt->channelLabel() }}</span>
                 <span style="opacity:.85;">📅 {{ $attempt->attempted_at?->format('d/m/Y') }}</span>
+                @php
+                    $oc = match ($attempt->outcomeColor()) {
+                        'success' => ['#dcfce7', '#166534'],
+                        'info' => ['#dbeafe', '#1e40af'],
+                        'warning' => ['#fef9c3', '#854d0e'],
+                        'danger' => ['#fee2e2', '#991b1b'],
+                        default => ['#f3f4f6', '#374151'],
+                    };
+                @endphp
+                <span style="padding:.12rem .5rem;border-radius:9999px;font-size:.72rem;font-weight:700;background:{{ $oc[0] }};color:{{ $oc[1] }};">{{ $attempt->outcomeLabel() }}</span>
                 @if ($attempt->notes)
                     <span style="flex-basis:100%;font-size:.8rem;opacity:.7;padding-left:2.1rem;">— {{ $attempt->notes }}</span>
                 @endif

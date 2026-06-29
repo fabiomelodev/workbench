@@ -3,6 +3,7 @@
 namespace App\Filament\Actions;
 
 use App\Models\Prospect;
+use App\Models\ProspectAttempt;
 use Filament\Actions\Action;
 use Filament\Forms\Components\{DatePicker, Select, Textarea};
 use Filament\Notifications\Notification;
@@ -49,6 +50,11 @@ class AttemptsAction extends Action
                             ->label('Meio de canal')
                             ->options(Prospect::getTypeChannels())
                             ->required(),
+                        Select::make('outcome')
+                            ->label('Desfecho')
+                            ->options(ProspectAttempt::getOutcomes())
+                            ->default(ProspectAttempt::OUTCOME_NO_ANSWER)
+                            ->required(),
                         DatePicker::make('attempted_at')
                             ->label('Data')
                             ->default(now())
@@ -72,6 +78,7 @@ class AttemptsAction extends Action
 
                 $prospect->attempts()->create([
                     'channel' => $data['channel'],
+                    'outcome' => $data['outcome'] ?? null,
                     'attempted_at' => $data['attempted_at'],
                     'notes' => $data['notes'] ?? null,
                 ]);

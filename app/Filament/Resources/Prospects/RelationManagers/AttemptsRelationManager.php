@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Prospects\RelationManagers;
 
 use App\Models\Prospect;
+use App\Models\ProspectAttempt;
 use Filament\Actions\{CreateAction, DeleteAction, EditAction};
 use Filament\Forms\Components\{DatePicker, Select, Textarea};
 use Filament\Resources\RelationManagers\RelationManager;
@@ -22,6 +23,11 @@ class AttemptsRelationManager extends RelationManager
             Select::make('channel')
                 ->label('Meio de canal')
                 ->options(Prospect::getTypeChannels())
+                ->required(),
+            Select::make('outcome')
+                ->label('Desfecho')
+                ->options(ProspectAttempt::getOutcomes())
+                ->default(ProspectAttempt::OUTCOME_NO_ANSWER)
                 ->required(),
             DatePicker::make('attempted_at')
                 ->label('Data')
@@ -48,6 +54,11 @@ class AttemptsRelationManager extends RelationManager
                     ->label('Meio de canal')
                     ->badge()
                     ->formatStateUsing(fn(?string $state): string => $state ? Prospect::getChannel($state) : '—'),
+                TextColumn::make('outcome')
+                    ->label('Desfecho')
+                    ->badge()
+                    ->formatStateUsing(fn(ProspectAttempt $record): string => $record->outcomeLabel())
+                    ->color(fn(ProspectAttempt $record): string => $record->outcomeColor()),
                 TextColumn::make('notes')
                     ->label('Observação')
                     ->limit(60)
