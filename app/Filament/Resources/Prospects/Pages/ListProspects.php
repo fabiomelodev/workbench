@@ -49,6 +49,20 @@ class ListProspects extends ListRecords
     {
         return $kanban
             ->enumColumn('status', LeadStatus::class)
+            ->columnSummary(function ($records, $column) {
+                return match ($column->value) {
+                    LeadStatus::NEW ->value => 'Quando não fez nenhuma tentativa de contato.',
+                    LeadStatus::ON_HOLD->value => 'O contato foi feito, há interesse, mas o lead pediu para adiar a negociação por razões de timing/orçamento.',
+                    LeadStatus::INTOUCH->value => 'O cliente respondeu! A conversa está acontecendo agora em tempo real.',
+                    LeadStatus::AWAITING_RETURN->value => 'Você iniciou o contato (enviou mensagem/e-mail) e a bola está com o cliente.',
+                    LeadStatus::PASSED_DEPARTMENT->value => 'A pessoa com quem você falou não decide, mas te passou o contato do decisor.',
+                    LeadStatus::SCHEDULED_MEETING->value => 'O lead aceitou bater um papo',
+                    LeadStatus::HIRED->value => 'Contrato assinado, pix feito ou serviço iniciado. Sucesso total!',
+                    LeadStatus::CLOSED->value => 'O cliente recusou ativamente o serviço',
+                    LeadStatus::NO_RESPONSE->value => 'Você tentou contato 3 ou 4 vezes (fluxo de cadência) em dias diferentes e foi totalmente ignorado (vácuo).',
+                    default => ''
+                };
+            })
             // ->cardTitle(fn($record) => $record->proposal->name)
             ->cardView('filament.pages.kanban.card')
             ->cardAction(

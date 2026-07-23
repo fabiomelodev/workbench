@@ -47,15 +47,15 @@ class Prospect extends Model
     public static function getTypeStatus(): array
     {
         return [
-            static::ON_HOLD => 'Em espera',
             static::NEW => 'Novo',
+            static::ON_HOLD => 'Em espera',
             static::INTOUCH => 'Em contato',
             static::AWAITING_RETURN => 'Aguardando retorno',
             static::PASSED_DEPARTMENT => 'Repassado para outro departamento',
-            static::CLOSED => 'Encerrado',
             static::SCHEDULED_MEETING => 'Reunião marcada',
-            static::NO_RESPONSE => 'Sem resposta',
             static::HIRED => 'Contratado',
+            static::CLOSED => 'Encerrado',
+            static::NO_RESPONSE => 'Sem resposta',
         ];
     }
 

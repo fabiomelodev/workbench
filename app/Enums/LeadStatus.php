@@ -1,35 +1,36 @@
 <?php
 namespace App\Enums;
 
+use App\Models\Prospect;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Icons\Heroicon;
 use Wezlo\FilamentKanban\Contracts\KanbanStatusEnum;
 
 enum LeadStatus: string implements HasIcon, KanbanStatusEnum
 {
-    case ON_HOLD = 'on_hold';
     case NEW = 'new';
+    case ON_HOLD = 'on_hold';
     case INTOUCH = 'in_touch';
     case AWAITING_RETURN = 'awaiting_return';
     case PASSED_DEPARTMENT = 'passed_department';
-    case CLOSED = 'closed';
     case SCHEDULED_MEETING = 'scheduled_meeting';
-    case NO_RESPONSE = 'no_response';
     case HIRED = 'hired';
+    case CLOSED = 'closed';
+    case NO_RESPONSE = 'no_response';
 
     // Required by HasLabel (via KanbanStatusEnum)
     public function getLabel(): string
     {
         return match ($this) {
-            self::ON_HOLD => 'Em espera',
             self::NEW => 'Novo',
+            self::ON_HOLD => 'Em espera',
             self::INTOUCH => 'Em contato',
             self::AWAITING_RETURN => 'Aguardando retorno',
             self::PASSED_DEPARTMENT => 'Repassado para outro departamento',
-            self::CLOSED => 'Encerrado',
             self::SCHEDULED_MEETING => 'Reunião marcada',
-            self::NO_RESPONSE => 'Sem resposta',
             self::HIRED => 'Contratado',
+            self::CLOSED => 'Encerrado',
+            self::NO_RESPONSE => 'Sem resposta',
         };
     }
 
@@ -37,15 +38,15 @@ enum LeadStatus: string implements HasIcon, KanbanStatusEnum
     public function getColor(): string
     {
         return match ($this) {
-            self::ON_HOLD => 'warning',
-            self::NEW => 'success',
+            self::NEW => 'warning',
+            self::ON_HOLD => 'success',
             self::INTOUCH => 'success',
             self::AWAITING_RETURN => 'success',
             self::PASSED_DEPARTMENT => 'success',
-            self::CLOSED => 'info',
             self::SCHEDULED_MEETING => 'info',
-            self::NO_RESPONSE => 'info',
-            self::HIRED => 'info'
+            self::HIRED => 'info',
+            self::CLOSED => 'danger',
+            self::NO_RESPONSE => 'danger',
         };
     }
 
