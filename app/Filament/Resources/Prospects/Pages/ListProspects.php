@@ -65,7 +65,7 @@ class ListProspects extends ListRecords
             })
             ->modifyQueryUsing(fn(Builder $query): Builder => $query->with('proposal')->whereHas('proposal', function (Builder $query): Builder {
                 return $query->with('customer')->whereHas('customer', function (Builder $query): Builder {
-                    return $query->inactive();
+                    return $query->active();
                 });
             }))
             // ->cardTitle(fn($record) => $record->proposal->name)
