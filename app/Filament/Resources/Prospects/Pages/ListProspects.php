@@ -63,6 +63,11 @@ class ListProspects extends ListRecords
                     default => ''
                 };
             })
+            ->modifyQueryUsing(fn(Builder $query): Builder => $query->with('proposal')->whereHas('proposal', function (Builder $query): Builder {
+                return $query->with('customer')->whereHas('customer', function (Builder $query): Builder {
+                    return $query->inactive();
+                });
+            }))
             // ->cardTitle(fn($record) => $record->proposal->name)
             ->cardView('filament.pages.kanban.card')
             ->cardAction(
@@ -80,11 +85,11 @@ class ListProspects extends ListRecords
                         TextEntry::make('status')
                             ->badge()
                             ->formatStateUsing(fn(string $state): string => Prospect::getStatus($state)),
-                        TextEntry::make('attempts_count')
-                            ->label('Tentativas')
-                            ->badge()
-                            ->state(fn(Prospect $record): string => $record->attempts()->count() . '/' . Prospect::MAX_ATTEMPTS)
-                            ->color(fn(Prospect $record): string => $record->attempts()->count() >= Prospect::MAX_ATTEMPTS ? 'danger' : 'gray'),
+                        // TextEntry::make('attempts_count')
+                        //     ->label('Tentativas')
+                        //     ->badge()
+                        //     ->state(fn(Prospect $record): string => $record->attempts()->count() . '/' . Prospect::MAX_ATTEMPTS)
+                        //     ->color(fn(Prospect $record): string => $record->attempts()->count() >= Prospect::MAX_ATTEMPTS ? 'danger' : 'gray'),
                     ])
                     ->fillForm(fn($record) => $record->toArray())
                     ->modalSubmitAction(false)

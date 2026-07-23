@@ -18,6 +18,11 @@ class Customer extends Model
         return $query->where('status', 'active');
     }
 
+    public function scopeInactive(Builder $query): Builder
+    {
+        return $query->where('status', 'inactive');
+    }
+
     protected static function booted(): void
     {
         static::creating(function ($model) {
@@ -109,7 +114,7 @@ class Customer extends Model
     {
         $digits = $this->phoneDigits();
 
-        if (! $digits) {
+        if (!$digits) {
             return null;
         }
 
@@ -129,7 +134,7 @@ class Customer extends Model
     /** Link wa.me apenas quando o número é um celular válido. */
     public function whatsappUrl(?string $message = null): ?string
     {
-        if (! $this->isWhatsappCapable()) {
+        if (!$this->isWhatsappCapable()) {
             return null;
         }
 
@@ -219,7 +224,7 @@ class Customer extends Model
             return null;
         }
 
-        if (! preg_match('#^https?://#i', $site)) {
+        if (!preg_match('#^https?://#i', $site)) {
             $site = 'https://' . $site;
         }
 
@@ -267,7 +272,7 @@ class Customer extends Model
     /** Lista do que ainda falta cadastrar. */
     public function missingData(): array
     {
-        return array_keys(array_filter($this->dataChecklist(), fn ($filled) => ! $filled));
+        return array_keys(array_filter($this->dataChecklist(), fn($filled) => !$filled));
     }
 
     public function dataScore(): int
