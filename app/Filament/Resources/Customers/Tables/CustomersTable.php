@@ -86,8 +86,9 @@ class CustomersTable
             ])
             ->filters([
                 SelectFilter::make('niche_id')
-                    ->label('Nicho')
-                    ->relationship('niche', 'name'),
+                    ->label('Nicho(s)')
+                    ->relationship('niche', 'name')
+                    ->multiple(),
                 SelectFilter::make('city_id')
                     ->label('Cidade')
                     ->relationship('city', 'name'),

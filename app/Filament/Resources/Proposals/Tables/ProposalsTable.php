@@ -60,6 +60,10 @@ class ProposalsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('customer_id')
+                    ->label('Nicho(s)')
+                    ->relationship('customer.niche', 'name')
+                    ->multiple(),
                 SelectFilter::make('status')
                     ->options([
                         'active' => 'Ativo',
