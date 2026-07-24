@@ -2,16 +2,14 @@
 
 namespace App\Livewire;
 
-use App\Filament\Actions\AttemptsAction;
-use App\Filament\Actions\ContactCenterAction;
-use App\Filament\Actions\ProposalAction;
+use App\Filament\Actions\{AttemptsAction, ContactCenterAction, ProposalAction};
 use App\Helpers\FormatCurrency;
 use App\Models\Prospect;
 use Filament\Actions\{Action, ActionGroup, BulkActionGroup, DeleteAction, EditAction};
 use Filament\Forms\Components\{DatePicker, Select};
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\{SelectColumn, TextColumn};
+use Filament\Tables\Columns\{IconColumn, SelectColumn, TextColumn};
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
@@ -104,6 +102,10 @@ class ProspectsToWorkTable extends TableWidget
                     ->numeric()
                     ->sortable()
                     ->formatStateUsing(fn(?string $state): string => FormatCurrency::getFormatCurrency((string) $state)),
+                IconColumn::make('proposal.website')
+                    ->label('Site')
+                    ->icon(Heroicon::OutlinedGlobeAlt)
+                    ->url(fn(string $state): string => $state, true),
                 SelectColumn::make('status')
                     ->options(Prospect::getTypeStatus()),
                 TextColumn::make('attempts_count')
