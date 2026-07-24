@@ -23,6 +23,10 @@ class ProposalsTable
                     ->label('Cliente')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('customer.niche.name')
+                    ->label('Nicho')
+                    ->badge()
+                    ->searchable(),
                 TextColumn::make('type')
                     ->label('Tipo')
                     ->badge()
