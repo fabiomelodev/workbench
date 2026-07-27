@@ -5,16 +5,15 @@ namespace App\Livewire;
 use App\Filament\Actions\{AttemptsAction, ContactCenterAction, ProposalAction};
 use App\Helpers\FormatCurrency;
 use App\Models\Prospect;
-use Filament\Actions\{Action, ActionGroup, BulkActionGroup, DeleteAction, EditAction};
+use Filament\Actions\{Action, ActionGroup, BulkAction, BulkActionGroup, DeleteAction, EditAction};
 use Filament\Forms\Components\{DatePicker, Select};
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\{IconColumn, SelectColumn, TextColumn};
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\{Filter, SelectFilter};
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\{Builder, Collection, Model};
 use Illuminate\Support\Str;
 
 /**
@@ -192,7 +191,27 @@ class ProspectsToWorkTable extends TableWidget
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    //
+                    BulkAction::make('add_next_action')
+                        ->label('Adicionar Próxima Ação')
+                        ->icon(Heroicon::PlusSmall)
+                        ->schema([
+                            DatePicker::make('next_action')
+                                ->label('Próxima Ação'),
+                        ])
+                        ->action(function (Collection $records, $data, $livewire, $form) {
+                            $records->each(function (Model $record) use ($data) {
+                                $record->next_action = $data['next_action'];
+
+                                $record->save();
+                            });
+
+                            Notification::make()
+                                ->title('Alterado com Sucesso!')
+                                ->success()
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion()
+                        ->requiresConfirmation(),
                 ]),
             ]);
     }
