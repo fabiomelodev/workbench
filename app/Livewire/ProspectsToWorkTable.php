@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Filament\Actions\{AttemptsAction, ContactCenterAction, ProposalAction};
 use App\Helpers\FormatCurrency;
+use App\Models\Niche;
 use App\Models\Prospect;
 use Filament\Actions\{Action, ActionGroup, BulkAction, BulkActionGroup, DeleteAction, EditAction};
 use Filament\Forms\Components\{DatePicker, Select};
@@ -150,6 +151,21 @@ class ProspectsToWorkTable extends TableWidget
                         return $query->when($data['type'], function (Builder $query, $type): Builder {
                             return $query->with('proposal')->whereHas('proposal', function (Builder $query) use ($type): Builder {
                                 return $query->where('type', $type);
+                            });
+                        });
+                    }),
+                Filter::make('niche')
+                    ->schema([
+                        Select::make('niche')
+                            ->label('Nicho')
+                            ->options(fn() => Niche::query()->active()->orderBy('name', 'asc')->pluck('name', 'id'))
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when($data['niche'], function (Builder $query, $niche): Builder {
+                            return $query->with('proposal')->whereHas('proposal', function (Builder $query) use ($niche): Builder {
+                                return $query->with('customer')->whereHas('customer', function (Builder $query) use ($niche): Builder {
+                                    return $query->with('niche')->whereRelation('niche', 'id', $niche);
+                                });
                             });
                         });
                     }),
