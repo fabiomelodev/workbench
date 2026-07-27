@@ -10,6 +10,8 @@ use Filament\Forms\Components\{DatePicker, Select};
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\{IconColumn, SelectColumn, TextColumn};
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
@@ -126,6 +128,38 @@ class ProspectsToWorkTable extends TableWidget
                     ->label('Próxima Ação')
                     ->date('d/m/Y')
                     ->sortable(),
+            ])
+            ->filters([
+                Filter::make('next_action')
+                    ->schema([
+                        DatePicker::make('date')
+                            ->label('Próxima Ação')
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when($data['date'], fn(Builder $query, $date): Builder => $query->whereDate('next_action', $date));
+                    }),
+                Filter::make('proposal_type')
+                    ->schema([
+                        Select::make('type')
+                            ->label('Tipo de proposta')
+                            ->options([
+                                'closed_budget' => 'Orçamento Fechado',
+                                'signature' => 'Assinatura'
+                            ])
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when($data['type'], function (Builder $query, $type): Builder {
+                            return $query->with('proposal')->whereHas('proposal', function (Builder $query) use ($type): Builder {
+                                return $query->where('type', $type);
+                            });
+                        });
+                    }),
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options(Prospect::getTypeStatus()),
+                SelectFilter::make('proposal_id')
+                    ->label('Proposta')
+                    ->relationship('proposal', 'name'),
             ])
             ->recordActions([
                 ContactCenterAction::make(),
