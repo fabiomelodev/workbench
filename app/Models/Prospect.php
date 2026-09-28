@@ -12,8 +12,24 @@ class Prospect extends Model
 
     protected $casts = [
         'last_action' => 'datetime',
-        'next_action' => 'datetime'
+        'next_action' => 'datetime',
+        'hired_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        // Registra quando virou "Contratado" (Kanban, tabela, edição ou ação em massa
+        // salvam pelo model). Se sair do status, a data é limpa.
+        static::saving(function (Prospect $model) {
+            if (! $model->isDirty('status')) {
+                return;
+            }
+
+            $model->hired_at = $model->status === self::HIRED
+                ? ($model->hired_at ?? now())
+                : null;
+        });
+    }
 
     public const ON_HOLD = 'on_hold';
     public const NEW = 'new';

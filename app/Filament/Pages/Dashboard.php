@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Widgets\ControlStatsWidget;
+use App\Filament\Widgets\{BudgetStatsWidget, ControlStatsWidget};
 use App\Livewire\KanbanDashboardWidget;
 use App\Livewire\ProspectsToWorkTable;
 use Filament\Pages\Dashboard as BaseDashboard;
@@ -13,6 +13,7 @@ class Dashboard extends BaseDashboard
     {
         return [
             ControlStatsWidget::class,
+            BudgetStatsWidget::class,
             ProspectsToWorkTable::class,
             KanbanDashboardWidget::class,
         ];
