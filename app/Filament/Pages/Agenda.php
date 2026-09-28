@@ -20,7 +20,7 @@ class Agenda extends Page
 
     protected static ?string $navigationLabel = 'Agenda';
 
-    protected static ?int $navigationSort = -1;
+    protected static ?int $navigationSort = 0;
 
     protected static ?string $title = 'Agenda de follow-ups';
 
