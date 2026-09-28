@@ -36,6 +36,23 @@ class Proposal extends Model
         return $this->hasMany(Prospect::class);
     }
 
+    /** Cobranças da proposta (normalmente uma; mais de uma só se houver cancelada). */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /** Cobrança vigente (não cancelada), se houver. */
+    public function activeTransaction(): ?Transaction
+    {
+        return $this->transactions()->notCanceled()->latest('id')->first();
+    }
+
+    public function isSubscription(): bool
+    {
+        return $this->type === 'signature';
+    }
+
     /** Foi contratada quando alguma prospecção vinculada está como "Contratado". */
     public function isHired(): bool
     {

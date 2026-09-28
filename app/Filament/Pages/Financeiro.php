@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Widgets\BudgetStatsWidget;
+use App\Filament\Widgets\{BudgetStatsWidget, ReceivablesStatsWidget, UpcomingPaymentsTable};
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
@@ -25,6 +25,8 @@ class Financeiro extends Page
     {
         return [
             BudgetStatsWidget::class,
+            ReceivablesStatsWidget::class,
+            UpcomingPaymentsTable::class,
         ];
     }
 }

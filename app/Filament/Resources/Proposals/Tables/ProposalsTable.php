@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Proposals\Tables;
 
+use App\Filament\Actions\GenerateChargeAction;
 use App\Helpers\FormatCurrency;
 use App\Models\Prospect;
 use Filament\Actions\{BulkAction, BulkActionGroup, DeleteAction, DeleteBulkAction, EditAction};
@@ -89,6 +90,7 @@ class ProposalsTable
                     ),
             ])
             ->recordActions([
+                GenerateChargeAction::make(),
                 EditAction::make()
                     ->iconButton(),
                 DeleteAction::make()
