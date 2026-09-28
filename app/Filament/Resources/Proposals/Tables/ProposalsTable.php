@@ -3,14 +3,15 @@
 namespace App\Filament\Resources\Proposals\Tables;
 
 use App\Helpers\FormatCurrency;
+use App\Models\Prospect;
 use Filament\Actions\{BulkAction, BulkActionGroup, DeleteAction, DeleteBulkAction, EditAction};
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\{IconColumn, TextColumn};
-use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\{SelectFilter, TernaryFilter};
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\{Collection, Model};
+use Illuminate\Database\Eloquent\{Builder, Collection, Model};
 
 class ProposalsTable
 {
@@ -18,6 +19,9 @@ class ProposalsTable
     {
         return $table
             ->defaultSort('name', 'asc')
+            ->modifyQueryUsing(fn(Builder $query): Builder => $query->withExists([
+                'prospects as is_hired' => fn(Builder $query): Builder => $query->where('status', Prospect::HIRED),
+            ]))
             ->columns([
                 TextColumn::make('customer.name')
                     ->label('Cliente')
@@ -53,6 +57,11 @@ class ProposalsTable
                         'success' => 'active',
                         'danger' => 'inactive',
                     ]),
+                IconColumn::make('is_hired')
+                    ->label('Foi contratado')
+                    ->boolean()
+                    ->alignCenter()
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Criado Em')
                     ->dateTime('d/m/Y')
@@ -69,6 +78,15 @@ class ProposalsTable
                         'active' => 'Ativo',
                         'inactive' => 'Inativo',
                     ]),
+                TernaryFilter::make('is_hired')
+                    ->label('Foi contratado')
+                    ->placeholder('Todos')
+                    ->trueLabel('Sim')
+                    ->falseLabel('Não')
+                    ->queries(
+                        true: fn(Builder $query): Builder => $query->whereHas('prospects', fn(Builder $query): Builder => $query->where('status', Prospect::HIRED)),
+                        false: fn(Builder $query): Builder => $query->whereDoesntHave('prospects', fn(Builder $query): Builder => $query->where('status', Prospect::HIRED)),
+                    ),
             ])
             ->recordActions([
                 EditAction::make()

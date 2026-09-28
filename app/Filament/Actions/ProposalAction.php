@@ -6,7 +6,7 @@ use App\Models\Customer;
 use App\Models\Prospect;
 use App\Models\Proposal;
 use Filament\Actions\Action;
-use Filament\Forms\Components\{Select, TextInput};
+use Filament\Forms\Components\{Select, TextInput, Toggle};
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
@@ -35,9 +35,18 @@ class ProposalAction extends Action
             ->modalHeading('Proposta')
             ->modalDescription(fn (Model $record): ?string => static::resolveProposal($record)?->customer?->name)
             ->modalSubmitActionLabel('Salvar proposta')
-            ->fillForm(fn (Model $record): array => static::resolveProposal($record)?->only([
-                'name', 'amount', 'type', 'website', 'status',
-            ]) ?? [])
+            ->fillForm(function (Model $record): array {
+                $proposal = static::resolveProposal($record);
+
+                if (! $proposal) {
+                    return [];
+                }
+
+                return [
+                    ...$proposal->only(['name', 'amount', 'type', 'website', 'status']),
+                    'is_hired' => $proposal->isHired(),
+                ];
+            })
             ->schema([
                 Section::make()
                     ->columns(2)
@@ -69,6 +78,13 @@ class ProposalAction extends Action
                                 'inactive' => 'Inativo',
                             ])
                             ->required(),
+                        // Calculado: não é coluna da tabela, então não vai para o update().
+                        Toggle::make('is_hired')
+                            ->label('Foi contratado')
+                            ->helperText('Marcado automaticamente quando alguma prospecção desta proposta está como "Contratado".')
+                            ->onColor('success')
+                            ->disabled()
+                            ->dehydrated(false),
                     ]),
             ])
             ->action(function (Model $record, array $data) {
