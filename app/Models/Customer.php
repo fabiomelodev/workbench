@@ -38,6 +38,9 @@ class Customer extends Model
         static::saving(function (Customer $model) {
             $model->syncPhoneClassification();
         });
+
+        // As propostas saem por cascade no banco (sem eventos): limpa os arquivos delas.
+        static::deleting(fn (Customer $model) => $model->proposals()->get()->each->purgeFiles());
     }
 
     public function city(): BelongsTo
