@@ -2,6 +2,7 @@
 
 namespace App\Filament\Actions;
 
+use App\Filament\Components\ReceiptsUpload;
 use App\Models\{Payment, Transaction};
 use Filament\Actions\Action;
 use Filament\Forms\Components\{DatePicker, Select, Textarea};
@@ -31,6 +32,7 @@ class MarkPaymentPaidAction extends Action
                 'paid_at' => today()->toDateString(),
                 'method' => $record->method ?? 'pix',
                 'notes' => $record->notes,
+                'receipts' => $record->receipts ?? [],
             ])
             ->schema([
                 DatePicker::make('paid_at')
@@ -40,6 +42,8 @@ class MarkPaymentPaidAction extends Action
                     ->label('Forma de pagamento')
                     ->options(Payment::getMethods())
                     ->required(),
+                ReceiptsUpload::make()
+                    ->helperText('Opcional (imagens ou PDF, até 10 MB) — dá para anexar depois pelo botão "Comprovantes".'),
                 Textarea::make('notes')
                     ->label('Observação (opcional)')
                     ->rows(2),

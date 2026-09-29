@@ -2,7 +2,7 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Actions\MarkPaymentPaidAction;
+use App\Filament\Actions\{MarkPaymentPaidAction, PaymentReceiptsAction};
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Helpers\FormatCurrency;
 use App\Models\Payment;
@@ -49,6 +49,8 @@ class UpcomingPaymentsTable extends TableWidget
             ])
             ->recordActions([
                 MarkPaymentPaidAction::make(),
+                PaymentReceiptsAction::make()
+                    ->iconButton(),
                 Action::make('open')
                     ->label('Ver cobrança')
                     ->icon(Heroicon::OutlinedArrowTopRightOnSquare)

@@ -25,6 +25,17 @@ class Transaction extends Model
     public const PAID = 'paid';
     public const CANCELED = 'canceled';
 
+    protected static function booted(): void
+    {
+        // As parcelas saem por cascade no banco (sem eventos), então os
+        // comprovantes delas são apagados do disco aqui.
+        static::deleting(function (Transaction $transaction) {
+            $transaction->payments()->get(['id', 'receipts'])->each(
+                fn (Payment $payment) => Payment::deleteReceiptFiles($payment->receipts ?? []),
+            );
+        });
+    }
+
     public function proposal(): BelongsTo
     {
         return $this->belongsTo(Proposal::class);

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Transactions\RelationManagers;
 
-use App\Filament\Actions\MarkPaymentPaidAction;
+use App\Filament\Actions\{MarkPaymentPaidAction, PaymentReceiptsAction};
 use App\Helpers\FormatCurrency;
 use App\Models\Payment;
 use Filament\Actions\{Action, EditAction};
@@ -73,6 +73,10 @@ class PaymentsRelationManager extends RelationManager
                     ->label('Forma')
                     ->formatStateUsing(fn (Payment $record): ?string => $record->methodLabel())
                     ->placeholder('—'),
+                TextColumn::make('receipts')
+                    ->label('Comprovantes')
+                    ->state(fn (Payment $record): ?string => $record->receiptsCount() ? '📎 ' . $record->receiptsCount() : null)
+                    ->placeholder('—'),
                 TextColumn::make('notes')
                     ->label('Observação')
                     ->limit(40)
@@ -81,6 +85,8 @@ class PaymentsRelationManager extends RelationManager
             ])
             ->recordActions([
                 MarkPaymentPaidAction::make(),
+                // Sempre disponível, inclusive com a parcela já paga.
+                PaymentReceiptsAction::make(),
                 Action::make('undo')
                     ->label('Desfazer')
                     ->icon(Heroicon::OutlinedArrowUturnLeft)

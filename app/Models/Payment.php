@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 /** Parcela de uma cobrança (Transaction). paid_at null = em aberto. */
 class Payment extends Model
@@ -16,13 +17,41 @@ class Payment extends Model
         'number' => 'integer',
         'due_date' => 'date',
         'paid_at' => 'date',
+        'receipts' => 'array',
     ];
+
+    /** Disco privado: comprovantes só abrem por URL temporária, logado no painel. */
+    public const RECEIPTS_DISK = 'local';
 
     protected static function booted(): void
     {
         // Mantém a quitação da cobrança em sincronia com as parcelas.
         static::saved(fn (Payment $payment) => $payment->transaction?->refreshStatus());
         static::deleted(fn (Payment $payment) => $payment->transaction?->refreshStatus());
+
+        // Apaga do disco os comprovantes removidos da parcela ou da parcela excluída.
+        static::updated(function (Payment $payment) {
+            if ($payment->wasChanged('receipts')) {
+                $original = json_decode((string) $payment->getRawOriginal('receipts'), true) ?: [];
+                static::deleteReceiptFiles(array_diff($original, $payment->receipts ?? []));
+            }
+        });
+        static::deleted(fn (Payment $payment) => static::deleteReceiptFiles($payment->receipts ?? []));
+    }
+
+    /** @param  iterable<string>  $paths */
+    public static function deleteReceiptFiles(iterable $paths): void
+    {
+        foreach ($paths as $path) {
+            if (filled($path)) {
+                Storage::disk(self::RECEIPTS_DISK)->delete($path);
+            }
+        }
+    }
+
+    public function receiptsCount(): int
+    {
+        return count($this->receipts ?? []);
     }
 
     public static function getMethods(): array
